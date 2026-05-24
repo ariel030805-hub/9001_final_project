@@ -1,0 +1,68 @@
+{
+  "aaa@gmail.com": {
+    "email": "aaa@gmail.com",
+    "has_allergies": true,
+    "allergens": [
+      "seafood"
+    ],
+    "other_allergen": "",
+    "orders": [
+      {
+        "store": "Woolworths",
+        "price": 5.0,
+        "item": "Mystery Box",
+        "receipt_code": "#TEI-1664",
+        "pickup_message": "Please collect from Woolworths Town Hall before 9:00 PM.",
+        "time": "2026-05-24 21:02"
+      },
+      {
+        "store": "Harris Farm",
+        "price": 5.0,
+        "item": "Mystery Box",
+        "receipt_code": "#TEI-2455",
+        "pickup_message": "Please collect from Harris Farm Pyrmont before 9:00 PM.",
+        "time": "2026-05-24 21:02"
+      },
+      {
+        "store": "Coles",
+        "price": 5.0,
+        "item": "Mystery Box",
+        "receipt_code": "#TEI-4635",
+        "pickup_message": "Please collect from Coles Broadway before 9:00 PM.",
+        "time": "2026-05-24 21:02"
+      },
+      {
+        "store": "Harris Farm",
+        "price": 5.0,
+        "item": "Mystery Box",
+        "receipt_code": "#TEI-6560",
+        "pickup_message": "Please collect from Harris Farm Pyrmont before 9:00 PM.",
+        "time": "2026-05-24 21:02"
+      },
+      {
+        "store": "Harris Farm",
+        "price": 5.0,
+        "item": "Mystery Box",
+        "receipt_code": "#TEI-6837",
+        "pickup_message": "Please collect from Harris Farm Pyrmont before 9:00 PM.",
+        "time": "2026-05-24 21:02"
+      },
+      {
+        "store": "Harris Farm",
+        "price": 5.0,
+        "item": "Mystery Box",
+        "receipt_code": "#TEI-6148",
+        "pickup_message": "Please collect from Harris Farm Pyrmont before 9:00 PM.",
+        "time": "2026-05-24 21:03"
+      },
+      {
+        "store": "Harris Farm",
+        "price": 5.0,
+        "item": "Mystery Box",
+        "receipt_code": "#TEI-2023",
+        "pickup_message": "Please collect from Harris Farm Pyrmont before 9:00 PM.",
+        "time": "2026-05-24 21:03"
+      }
+    ]
+  }
+}

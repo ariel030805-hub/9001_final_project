@@ -1,0 +1,27 @@
+{
+  "Coles": {
+    "count": 4,
+    "img": "🛒",
+    "pickup_location": "Coles Broadway"
+  },
+  "Woolworths": {
+    "count": 4,
+    "img": "🥦",
+    "pickup_location": "Woolworths Town Hall"
+  },
+  "Aldi": {
+    "count": 5,
+    "img": "📐",
+    "pickup_location": "Aldi Haymarket"
+  },
+  "Harris Farm": {
+    "count": 0,
+    "img": "🍎",
+    "pickup_location": "Harris Farm Pyrmont"
+  },
+  "7-Eleven": {
+    "count": 5,
+    "img": "🏪",
+    "pickup_location": "7-Eleven Central"
+  }
+}
