@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TO EAT IT - Marketplace</title>
+    <style>
+        :root {
+            --primary: #2E7D32;
+            --accent: #4CAF50;
+            --bg: #F9FBF7;
+            --card-bg: #ffffff;
+        }
+        body {
+            font-family: '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .page { display: none; padding: 20px; box-sizing: border-box; }
+        .page.active { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
+
+        /* Quiz Styles */
+        .quiz-card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            animation: pop 0.3s ease;
+        }
+        .quiz-card h2 { color: var(--primary); margin-bottom: 25px; margin-top: 0; }
+        .btn-group { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
+        .btn-quiz {
+            padding: 12px 30px;
+            border: 2px solid var(--primary);
+            background: transparent;
+            color: var(--primary);
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-quiz:hover { background: var(--primary); color: white; }
+        .allergy-list { text-align: left; margin: 20px auto; max-width: 280px; }
+        .allergy-item { margin: 12px 0; font-size: 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .allergy-other-wrap { width: 100%; margin-left: 28px; margin-top: 6px; display: none; }
+        .allergy-other-wrap.visible { display: block; }
+        .allergy-other-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .allergy-other-input:focus { outline: none; border-color: var(--primary); }
+
+        /* Enjoy Transition Page */
+        #enjoy-page { background: linear-gradient(135deg, #2E7D32 0%, #4CAF50 100%); color: white; text-align: center; }
+        .enjoy-title { font-size: 4rem; font-weight: 900; margin-bottom: 10px; }
+        .enjoy-sub { font-size: 1.2rem; opacity: 0.9; }
+        .countdown { font-size: 2rem; margin-top: 20px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 50px;}
+
+        /* Marketplace Styles */
+        #market-page { justify-content: flex-start; padding-top: 24px; }
+        .co2-banner {
+            width: 100%;
+            max-width: 1100px;
+            background: linear-gradient(90deg, #E8F5E9, #C8E6C9);
+            color: var(--primary);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 1px solid #A5D6A7;
+            box-sizing: border-box;
+        }
+        .header-bar { width: 100%; max-width: 1100px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .location-tag { background: #E8F5E9; color: var(--primary); padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .header-actions { display: flex; align-items: center; gap: 16px; }
+        .profile-btn, .logout-btn {
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 0;
+        }
+        .profile-btn { color: var(--primary); font-weight: bold; }
+        .logout-btn { color: #666; text-decoration: none; }
+
+        /* Profile Sidebar */
+        .profile-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.35);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            z-index: 100;
+        }
+        .profile-overlay.open { opacity: 1; visibility: visible; }
+        .profile-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: min(360px, 90vw);
+            height: 100vh;
+            background: white;
+            box-shadow: -4px 0 24px rgba(0,0,0,0.12);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 101;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .profile-panel.open { transform: translateX(0); }
+        .profile-header {
+            padding: 24px;
+            background: linear-gradient(135deg, #2E7D32, #4CAF50);
+            color: white;
+            position: relative;
+        }
+        .profile-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .profile-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            border: 3px solid rgba(255,255,255,0.5);
+        }
+        .profile-email { font-size: 15px; opacity: 0.95; word-break: break-all; }
+        .profile-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+        .profile-section-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+        .order-list { list-style: none; padding: 0; margin: 0; }
+        .order-item {
+            padding: 14px;
+            background: #F9FBF7;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #EEF2EB;
+        }
+        .order-item .order-store { font-weight: bold; color: var(--primary); }
+        .order-item .order-detail { font-size: 13px; color: #666; margin-top: 4px; }
+        .order-empty { color: #999; font-size: 14px; text-align: center; padding: 24px 0; }
+        .allergen-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+        .allergen-tag {
+            background: #E8F5E9;
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .allergen-none { color: #888; font-size: 14px; margin-bottom: 24px; }
+        
+        .market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; width: 100%; max-width: 1100px; }
+        .store-card { background: var(--card-bg); border-radius: 16px; padding: 25px; text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.04); position: relative; transition: all 0.3s ease; border: 1px solid #EEF2EB; }
+        .store-icon { font-size: 3rem; margin-bottom: 10px; }
+        .store-name { font-size: 1.2rem; font-weight: bold; margin: 10px 0 5px 0; }
+        .price-tag { color: #E65100; font-weight: bold; font-size: 1.4rem; margin-bottom: 5px; }
+        .stock-count { color: #666; font-size: 13px; margin-bottom: 15px; }
+        
+        .btn-buy { width: 100%; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+
+        /* Claim Voucher Modal */
+        .voucher-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s, visibility 0.25s;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .voucher-overlay.open { opacity: 1; visibility: visible; }
+        .voucher-modal {
+            background: white;
+            border-radius: 20px;
+            max-width: 400px;
+            width: 100%;
+            padding: 32px 28px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            transform: scale(0.92);
+            transition: transform 0.25s ease;
+        }
+        .voucher-overlay.open .voucher-modal { transform: scale(1); }
+        .voucher-success-icon { font-size: 48px; margin-bottom: 8px; }
+        .voucher-title { font-size: 22px; font-weight: bold; color: var(--primary); margin: 0 0 6px 0; }
+        .voucher-subtitle { color: #666; font-size: 14px; margin: 0 0 24px 0; }
+        .voucher-code-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+        .voucher-code {
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--primary);
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            font-family: 'SF Mono', 'Menlo', monospace;
+        }
+        .voucher-pickup {
+            background: #F1F8E9;
+            border: 1px dashed #A5D6A7;
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+            margin-bottom: 24px;
+        }
+        .voucher-pickup strong { color: var(--primary); }
+        .voucher-close-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .voucher-close-btn:hover { background: #1B5E20; }
+        .btn-buy:hover { background: #1B5E20; }
+
+        .store-card.sold-out { filter: grayscale(1) opacity(0.5); }
+        .store-card.sold-out .btn-buy { background: #ccc !important; cursor: not-allowed; }
+
+        @keyframes pop {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ================= 1. DYNAMIC ONBOARDING QUIZ ================= -->
+    <div id="quiz-page" class="page active">
+        <!-- Core container: no questions hardcoded here, dynamically request from Python and generate via JS -->
+        <div id="quiz-container" class="quiz-card">
+            <p style="color: #999;">Loading onboarding quiz...</p>
+        </div>
+    </div>
+
+    <!-- ================= 2. ENJOY TRANSITION PAGE ================= -->
+    <div id="enjoy-page" class="page">
+        <div class="enjoy-title">Enjoy! 🎉</div>
+        <div class="enjoy-sub">Your personalized dynamic marketplace is ready.</div>
+        <div class="countdown" id="timer">3</div>
+    </div>
+
+    <!-- ================= 3. LIVE MARKETPLACE ================= -->
+    <div id="market-page" class="page">
+        <div class="co2-banner" id="co2-banner">You have saved 0kg CO2 today!</div>
+        <div class="header-bar">
+            <div class="location-tag">📍 Sydney, NSW <span style="font-weight: normal; margin-left:10px; color:#666;">• Live Market</span></div>
+            <h1 style="margin: 0; font-size: 24px; color: var(--primary);">🌱 TO EAT IT</h1>
+            <div class="header-actions">
+                <button type="button" class="profile-btn" onclick="openProfile()">Profile</button>
+                <a href="/logout" class="logout-btn">Log Out</a>
+            </div>
+        </div>
+        <div class="market-grid" id="market-grid"></div>
+    </div>
+
+    <div class="profile-overlay" id="profile-overlay" onclick="closeProfile()"></div>
+    <aside class="profile-panel" id="profile-panel">
+        <div class="profile-header">
+            <button type="button" class="profile-close" onclick="closeProfile()" aria-label="Close">×</button>
+            <div class="profile-avatar" id="profile-avatar">?</div>
+            <div class="profile-email" id="profile-email">Loading...</div>
+        </div>
+        <div class="profile-body">
+            <div class="profile-section-title">Allergens</div>
+            <div id="profile-allergens"></div>
+            <div class="profile-section-title">Order History</div>
+            <ul class="order-list" id="order-list">
+                <li class="order-empty">No orders yet</li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- Claim Voucher Receipt Modal -->
+    <div class="voucher-overlay" id="voucher-overlay" onclick="closeVoucherOnBackdrop(event)">
+        <div class="voucher-modal" onclick="event.stopPropagation()">
+            <div class="voucher-success-icon">✅</div>
+            <h2 class="voucher-title">Purchase Successful!</h2>
+            <p class="voucher-subtitle">Your Claim Voucher is ready</p>
+            <div class="voucher-code-label">Receipt Code</div>
+            <div class="voucher-code" id="voucher-code">#TEI-0000</div>
+            <div class="voucher-pickup" id="voucher-pickup"></div>
+            <button type="button" class="voucher-close-btn" onclick="closeVoucher()">Got it</button>
+        </div>
+    </div>
+
+
+    <script>
+        // Global variable to store the complete quiz tree downloaded from Python backend
+        let backendQuizData = {};
+
+        // As soon as the page loads, fetch questions from the Python backend
+        window.addEventListener('DOMContentLoaded', async () => {
+            const response = await fetch('/api/quiz-data');
+            backendQuizData = await response.json();
+            // Start rendering from the first question "q1"
+            renderQuizStep("q1");
+        });
+
+        // Core function: dynamically render the current question based on data from Python
+        function renderQuizStep(stepKey) {
+            // If next step is "enjoy", it means all questions are done, directly enter countdown transition logic
+            if (stepKey === 'enjoy') {
+                startEnjoyTransition();
+                return;
+            }
+
+            const container = document.getElementById('quiz-container');
+            const stepData = backendQuizData[stepKey];
+
+            if (!stepData) return;
+
+            // Branch handling 1: Simple yes/no choice question (Choice Type)
+            if (stepData.type === 'choice') {
+                if (stepKey === 'q3') {
+                    container.innerHTML = `
+                        <h2>${stepData.title}</h2>
+                        ${stepData.subtitle ? `<p style="color: #666;">${stepData.subtitle}</p>` : ''}
+                        <div class="btn-group">
+                            <button class="btn-quiz" onclick="renderQuizStep('${stepData.next_yes}')">Yes</button>
+                            <button class="btn-quiz" onclick="saveAllergyStatus(false, '${stepData.next_no}')">No</button>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <h2>${stepData.title}</h2>
+                        ${stepData.subtitle ? `<p style="color: #666;">${stepData.subtitle}</p>` : ''}
+                        <div class="btn-group">
+                            <button class="btn-quiz" onclick="renderQuizStep('${stepData.next_yes}')">Yes</button>
+                            <button class="btn-quiz" onclick="renderQuizStep('${stepData.next_no}')">No</button>
+                        </div>
+                    `;
+                }
+            }
+            // Branch handling 2: Pure text introduction transition page (Intro Type)
+            else if (stepData.type === 'intro') {
+                container.innerHTML = `
+                    <h2>${stepData.title}</h2>
+                    <p style="text-align: left; line-height: 1.6; color:#555;">${stepData.content}</p>
+                    <button class="btn-quiz" style="margin-top: 15px;" onclick="renderQuizStep('${stepData.next}')">Got it, Next!</button>
+                `;
+            } 
+            // Branch handling 3: Multi-select allergen page (Checkbox Type)
+            else if (stepData.type === 'checkbox') {
+                let optionsHtml = '';
+                stepData.options.forEach(opt => {
+                    if (opt.custom) {
+                        optionsHtml += `
+                            <div class="allergy-item">
+                                <input type="checkbox" id="item-${opt.id}" onchange="toggleOtherAllergenInput()">
+                                <label for="item-${opt.id}">${opt.label}</label>
+                                <div class="allergy-other-wrap" id="other-allergen-wrap">
+                                    <input type="text" class="allergy-other-input" id="other-allergen-input"
+                                        placeholder="Please specify your allergen..." maxlength="120">
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        optionsHtml += `
+                            <div class="allergy-item">
+                                <input type="checkbox" id="item-${opt.id}">
+                                <label for="item-${opt.id}">${opt.label}</label>
+                            </div>
+                        `;
+                    }
+                });
+
+                container.innerHTML = `
+                    <h2>${stepData.title}</h2>
+                    <div class="allergy-list">${optionsHtml}</div>
+                    <button class="btn-quiz" onclick="completeAllergenStep('${stepData.next}')">Complete & Save</button>
+                `;
+            }
+        }
+
+        async function saveAllergyStatus(hasAllergies, nextStep) {
+            await fetch('/api/allergens', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    has_allergies: hasAllergies,
+                    allergens: [],
+                    other_allergen: ''
+                })
+            });
+            renderQuizStep(nextStep);
+        }
+
+        function updateCo2Banner(kg) {
+            const banner = document.getElementById('co2-banner');
+            if (!banner) return;
+            const value = Number(kg);
+            const display = Number.isInteger(value) ? value : value.toFixed(1);
+            banner.textContent = `You have saved ${display}kg CO2 today!`;
+        }
+
+        function toggleOtherAllergenInput() {
+            const checkbox = document.getElementById('item-other');
+            const wrap = document.getElementById('other-allergen-wrap');
+            if (!checkbox || !wrap) return;
+            wrap.classList.toggle('visible', checkbox.checked);
+            if (!checkbox.checked) {
+                const input = document.getElementById('other-allergen-input');
+                if (input) input.value = '';
+            }
+        }
+
+        async function completeAllergenStep(nextStep) {
+            const selected = [];
+            document.querySelectorAll('.allergy-list input[type="checkbox"]:checked').forEach(cb => {
+                const id = cb.id.replace('item-', '');
+                if (id !== 'other') selected.push(id);
+            });
+
+            let otherAllergen = '';
+            const otherChecked = document.getElementById('item-other')?.checked;
+            if (otherChecked) {
+                otherAllergen = (document.getElementById('other-allergen-input')?.value || '').trim();
+                if (!otherAllergen) {
+                    alert('Please specify your other allergen, or uncheck Other.');
+                    return;
+                }
+                selected.push('other');
+            }
+
+            await fetch('/api/allergens', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    has_allergies: true,
+                    allergens: selected,
+                    other_allergen: otherAllergen
+                })
+            });
+
+            renderQuizStep(nextStep);
+        }
+
+        async function openProfile() {
+            document.getElementById('profile-overlay').classList.add('open');
+            document.getElementById('profile-panel').classList.add('open');
+            await loadProfile();
+        }
+
+        function closeProfile() {
+            document.getElementById('profile-overlay').classList.remove('open');
+            document.getElementById('profile-panel').classList.remove('open');
+        }
+
+        async function loadProfile() {
+            const response = await fetch('/api/profile');
+            const data = await response.json();
+
+            document.getElementById('profile-avatar').textContent = data.avatar_letter || '?';
+            document.getElementById('profile-email').textContent = data.email || '';
+
+            const allergenEl = document.getElementById('profile-allergens');
+            if (!data.has_allergies) {
+                allergenEl.innerHTML = '<p class="allergen-none">No allergens reported</p>';
+            } else if (data.allergen_display && data.allergen_display.length > 0) {
+                allergenEl.innerHTML = `
+                    <div class="allergen-tags">
+                        ${data.allergen_display.map(label => `<span class="allergen-tag">${label}</span>`).join('')}
+                    </div>
+                `;
+            } else {
+                allergenEl.innerHTML = '<p class="allergen-none">Allergies reported — no specific items selected</p>';
+            }
+
+            const orderList = document.getElementById('order-list');
+            if (!data.orders || data.orders.length === 0) {
+                orderList.innerHTML = '<li class="order-empty">No orders yet</li>';
+                return;
+            }
+
+            orderList.innerHTML = data.orders.map(order => `
+                <li class="order-item">
+                    <div class="order-store">${order.store} — ${order.item}</div>
+                    <div class="order-detail">
+                        $${order.price.toFixed(2)} · ${order.time}
+                        ${order.receipt_code ? `<br><span style="color:var(--primary);font-weight:600;">${order.receipt_code}</span>` : ''}
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        // 3-second transition countdown
+        function startEnjoyTransition() {
+            document.getElementById('quiz-page').classList.remove('active');
+            const enjoyPage = document.getElementById('enjoy-page');
+            enjoyPage.classList.add('active');
+            
+            let timeLeft = 3;
+            const timerElement = document.getElementById('timer');
+            
+            const interval = setInterval(() => {
+                timeLeft--;
+                timerElement.innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    enjoyPage.classList.remove('active');
+                    initMarketplace(); // Enter main marketplace
+                }
+            }, 1000);
+        }
+
+        // --- Real-time dynamic marketplace logic (unchanged) ---
+        async function initMarketplace() {
+            document.getElementById('market-page').classList.add('active');
+            await fetchInventory();
+        }
+
+        async function fetchInventory() {
+            const response = await fetch('/api/inventory');
+            const data = await response.json();
+            renderMarket(data.inventory);
+            if (data.total_co2_saved !== undefined) {
+                updateCo2Banner(data.total_co2_saved);
+            }
+        }
+
+        function renderMarket(inventory) {
+            const grid = document.getElementById('market-grid');
+            grid.innerHTML = '';
+            for (const [storeName, info] of Object.entries(inventory)) {
+                const isSoldOut = info.count === 0;
+                const idKey = storeName.replace(/\s+/g, '');
+                
+                const card = document.createElement('div');
+                card.className = `store-card ${isSoldOut ? 'sold-out' : ''}`;
+                card.id = `card-${idKey}`;
+                card.innerHTML = `
+                    <div class="store-icon">${info.img}</div>
+                    <div class="store-name">${storeName}</div>
+                    <div class="price-tag">$5.00</div>
+                    <div class="stock-count" id="stock-${idKey}">Left: ${info.count} boxes</div>
+                    <button class="btn-buy" ${isSoldOut ? 'disabled' : ''} onclick="buyBox('${storeName}')">
+                        ${isSoldOut ? 'Sold Out' : 'Buy Now'}
+                    </button>
+                `;
+                grid.appendChild(card);
+            }
+        }
+
+        function showVoucherModal(data) {
+            document.getElementById('voucher-code').textContent = data.receipt_code || '#TEI-0000';
+            document.getElementById('voucher-pickup').innerHTML =
+                `<strong>📍 Pickup:</strong> ${data.pickup_message || 'Please collect before 9:00 PM.'}`;
+            document.getElementById('voucher-overlay').classList.add('open');
+        }
+
+        function closeVoucher() {
+            document.getElementById('voucher-overlay').classList.remove('open');
+        }
+
+        function closeVoucherOnBackdrop(event) {
+            if (event.target.id === 'voucher-overlay') closeVoucher();
+        }
+
+        async function buyBox(storeName) {
+            const idKey = storeName.replace(/\s+/g, '');
+            const response = await fetch('/api/buy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ store: storeName })
+            });
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                if (data.total_co2_saved !== undefined) {
+                    updateCo2Banner(data.total_co2_saved);
+                }
+
+                showVoucherModal(data);
+
+                const stockText = document.getElementById(`stock-${idKey}`);
+                stockText.innerText = `Left: ${data.new_count} boxes`;
+
+                if (data.new_count === 0) {
+                    const card = document.getElementById(`card-${idKey}`);
+                    card.classList.add('sold-out');
+                    const btn = card.querySelector('.btn-buy');
+                    btn.innerText = 'Sold Out';
+                    btn.disabled = true;
+                }
+
+                if (document.getElementById('profile-panel').classList.contains('open')) {
+                    await loadProfile();
+                }
+            } else {
+                alert(data.message);
+            }
+        }
+    </script>
+</body>
+</html>

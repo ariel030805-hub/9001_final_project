@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TO EAT IT - Welcome</title>
+    <style>
+        :root {
+            --primary-color: #2E7D32;
+            --accent-color: #4CAF50;
+            --bg-color: #F1F8E9;
+            --text-color: #333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .auth-container {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+        }
+        .brand {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background-color: #1B5E20;
+        }
+        .switch-mode {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        .switch-mode a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .message {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            display: none;
+            text-align: center;
+        }
+        .error { background-color: #FFEBEE; color: #C62828; }
+        .success { background-color: #E8F5E9; color: #2E7D32; }
+    </style>
+</head>
+<body>
+
+<div class="auth-container">
+    <div class="brand">🌱 TO EAT IT</div>
+    <div class="subtitle">Sydney's Anti-Food Waste Platform</div>
+    
+    <div id="msg" class="message"></div>
+
+    <form id="authForm">
+        <div class="form-group">
+            <label for="email">Email address</label>
+            <input type="email" id="email" placeholder="e.g., student@gmail.com" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Enter password" required>
+        </div>
+        <button type="submit" id="submitBtn">Log In</button>
+    </form>
+
+    <div class="switch-mode">
+        <span id="switchText">New to To Eat It?</span> 
+        <a href="#" id="switchLink">Create an account</a>
+    </div>
+</div>
+
+<script>
+    let currentMode = 'login';
+    const form = document.getElementById('authForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const switchLink = document.getElementById('switchLink');
+    const switchText = document.getElementById('switchText');
+    const msgDiv = document.getElementById('msg');
+
+    switchLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        msgDiv.style.display = 'none';
+        if (currentMode === 'login') {
+            currentMode = 'register';
+            submitBtn.innerText = 'Sign Up';
+            switchText.innerText = 'Already have an account?';
+            switchLink.innerText = 'Log In';
+        } else {
+            currentMode = 'login';
+            submitBtn.innerText = 'Log In';
+            switchText.innerText = 'New to To Eat It?';
+            switchLink.innerText = 'Create an account';
+        }
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        const response = await fetch('/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: currentMode, email, password })
+        });
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            msgDiv.className = 'message success';
+            msgDiv.innerText = data.message;
+            msgDiv.style.display = 'block';
+            setTimeout(() => { window.location.href = '/'; }, 1000);
+        } else {
+            msgDiv.className = 'message error';
+            msgDiv.innerText = data.message;
+            msgDiv.style.display = 'block';
+        }
+    });
+</script>
+</body>
+</html>
